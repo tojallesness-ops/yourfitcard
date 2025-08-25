@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef, useId } from "react";
+import { useState as useLocalState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // =============================================
@@ -27,9 +28,17 @@ const Icon = {
       <rect x="14" y="12" width="4" height="4" rx="1" />
     </svg>
   ),
-  Gear: (p) => (
+  Trophy: (p) => (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...p}>
-      <path d="M19.14,12.94a7.43,7.43,0,0,0,.05-1,7.43,7.43,0,0,0-.05-1l2.11-1.65a.5.5,0,0,0,.12-.66l-2-3.46a.5.5,0,0,0-.6-.22l-2.49,1a7.28,7.28,0,0,0-1.73-1l-.38-2.65A.5.5,0,0,0,13.5,0h-4a.5.5,0,0,0-.5.42L8.62,3.07a7.28,7.28,0,0,0-1.73,1l-2.49-1a.5.5,0,0,0-.6.22l-2,3.46a.5.5,0,0,0,.12.66L3.9,10a7.43,7.43,0,0,0,0,2L1.9,13.65a.5.5,0,0,0-.12.66l2,3.46a.5.5,0,0,0,.6.22l2.49-1a7.28,7.28,0,0,0,1.73,1l.38,2.65a.5.5,0,0,0,.5.42h4a.5.5,0,0,0,.5-.42l.38-2.65a7.28,7.28,0,0,0,1.73-1l2.49,1a.5.5,0,0,0,.6-.22l2-3.46a.5.5,0,0,0-.12-.66ZM11.5,15A3.5,3.5,0,1,1,15,11.5,3.5,3.5,0,0,1,11.5,15Z" />
+      <rect x="5" y="4" width="14" height="8" rx="4" fill="url(#grad)" />
+      <rect x="9" y="12" width="6" height="6" rx="2" fill="#fff" />
+      <rect x="7" y="18" width="10" height="2" rx="1" fill="url(#grad)" />
+      <defs>
+        <linearGradient id="grad" x1="0" x2="1" y1="1" y2="0">
+          <stop offset="0%" stopColor="#3B82F6" />
+          <stop offset="100%" stopColor="#C026D3" />
+        </linearGradient>
+      </defs>
     </svg>
   ),
   Sun: (p) => (
@@ -96,10 +105,18 @@ const computeOvr = (ratings) => {
 // Original achievements (kept for tests)
 const achievementDefs = [
   { id: "first_session", label: "First Session", test: (_r, w) => w.length > 0 },
-  { id: "ovr_60", label: "Overall 60+", test: (r) => computeOvr(r) >= 60 },
-  { id: "any_60", label: "Any Stat 60+", test: (r) => Object.values(r).some((v) => v >= 60) },
-  { id: "sprinter_bronze", label: "Sprinter Bronze", test: (r) => r.Spe >= 60 },
-  { id: "stayer_bronze", label: "Stayer Bronze", test: (r) => r.Sta >= 60 },
+  // OVR достижения (60, 70, 80, 90, 100, 110)
+  ...Array.from({ length: 6 }, (_, i) => ({
+    id: `ovr_${60 + i * 10}`,
+    label: `Overall ${60 + i * 10}+`,
+    test: (r) => computeOvr(r) >= 60 + i * 10
+  })),
+  // Достижения по каждой характеристике (60, 70, 80, 90, 100, 110)
+  ...statList.flatMap((stat) => Array.from({ length: 6 }, (_, i) => ({
+    id: `${stat.toLowerCase()}_${60 + i * 10}`,
+    label: `${statMeta[stat].name} ${60 + i * 10}+`,
+    test: (r) => r[stat] >= 60 + i * 10
+  }))),
 ];
 const computeAchievements = (ratings, workouts) => achievementDefs.filter((a) => a.test(ratings, workouts)).map((a) => a.id);
 
@@ -331,7 +348,7 @@ const AerobicPanel = ({ ratings, xp, onLongPress, theme }) => {
     { key: "Spe", label: "Speed" },
   ];
   return (
-    <PanelShell icon={<Icon.Gear className="w-4 h-4" />} iconBg="bg-blue-600/20" title="Aerobic" subtitle="Cardiovascular Training">
+    <PanelShell icon={<Icon.Trophy className="w-4 h-4" />} iconBg="bg-blue-600/20" title="Aerobic" subtitle="Cardiovascular Training">
       <div className="grid grid-cols-2 gap-4">
         {blocks.map(({ key, label }) => {
           let timer;
@@ -360,7 +377,7 @@ const AnaerobicPanel = ({ ratings, xp, onLongPress, theme }) => {
     { key: "BaB", label: "Balance & Ball" },
   ];
   return (
-    <PanelShell icon={<Icon.Gear className="w-4 h-4" />} iconBg="bg-fuchsia-600/20" title="Anaerobic" subtitle="Power & Skill Training">
+    <PanelShell icon={<Icon.Trophy className="w-4 h-4" />} iconBg="bg-fuchsia-600/20" title="Anaerobic" subtitle="Power & Skill Training">
       <div className="grid grid-cols-2 gap-4">
         {blocks.map(({ key, label }) => {
           let timer;
@@ -402,32 +419,29 @@ const AchievementsPanel = ({ ratings, workouts, theme }) => {
   const unlocked = computeAchievements(ratings, workouts);
   const setUnlocked = new Set(unlocked);
   return (
-    <PanelShell icon={<Shield locked={false} />} iconBg="bg-white/10" title="Achievements" subtitle="">
+    <PanelShell icon={<Icon.Trophy className="w-4 h-4" />} iconBg="bg-white/10" title="Achievements" subtitle="">
       <div className="grid grid-cols-2 gap-3">
-        {achievementDefs.map((a) => {
-          const has = setUnlocked.has(a.id);
-          return (
-            <div key={a.id} className={`flex items-center gap-3 rounded-xl p-3 border ${has ? "border-white/15 bg-white/5" : "border-white/5 bg-white/0 opacity-70"}`}>
-              <Shield locked={!has} />
-              <div>
-                <div className="text-sm font-semibold tracking-tight">{a.label}</div>
-                <div className="text-[11px] opacity-70">{has ? "Unlocked" : "Locked"}</div>
-              </div>
+        {achievementDefs.filter((a) => setUnlocked.has(a.id)).map((a) => (
+          <div key={a.id} className="flex items-center gap-3 rounded-xl p-3 border border-white/15 bg-white/5">
+            <Icon.Trophy className="w-6 h-6" />
+            <div>
+              <div className="text-sm font-semibold tracking-tight">{a.label}</div>
+              <div className="text-[11px] opacity-70">Unlocked</div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     </PanelShell>
   );
 };
 
-import { useState as useLocalState } from "react";
 const GoogleAuthPanel = ({ user, onSignIn, onSignOut, onSave, onLoad, theme }) => {
   const [synced, setSynced] = useLocalState(false);
   const handleSave = () => {
     onSave();
     setSynced(true);
     setTimeout(() => setSynced(false), 2000);
+  };
   return (
     <div className={
       theme === "dark"
@@ -454,6 +468,7 @@ const GoogleAuthPanel = ({ user, onSignIn, onSignOut, onSave, onLoad, theme }) =
       </div>
     </div>
   );
+};
 const startOfWeek = (date) => {
   const d = new Date(date);
   const day = d.getDay(); // 0 Sun .. 6 Sat
@@ -592,7 +607,8 @@ const WeekCalendar = ({ workouts, weekOffset, setWeekOffset, weeklyGoal = 5 }) =
 };
 
 // ---------------- Main Prototype ----------------
-export default function FitcardPrototype() {
+
+function FitcardPrototype() {
   // По умолчанию dark
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
@@ -849,6 +865,7 @@ export default function FitcardPrototype() {
   );
 }
 
+
 // ---------------- Self-tests (runtime, no UI impact) ----------------
 if (typeof window !== "undefined" && !window.__FITCARD_TESTED__) {
   window.__FITCARD_TESTED__ = true;
@@ -877,3 +894,5 @@ if (typeof window !== "undefined" && !window.__FITCARD_TESTED__) {
   const weekNums = Array.from({ length: 7 }, (_, i) => isoWeek(addDays(m, i)));
   console.assert(new Set(weekNums).size === 1, "isoWeek should be stable across Mon..Sun of same week");
 }
+
+export default FitcardPrototype;
