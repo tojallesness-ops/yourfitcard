@@ -15,6 +15,55 @@ import { motion, AnimatePresence } from "framer-motion";
 
 // ---------------- Icons (inline SVG) ----------------
 const Icon = {
+  Speed: (p) => (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...p}>
+      <circle cx="12" cy="12" r="10" fill="#e0e7ef" />
+      <path d="M12 6v6l4 2" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <path d="M12 12l-3 3" stroke="#C026D3" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <circle cx="12" cy="12" r="2.5" fill="#fff" stroke="#3B82F6" strokeWidth="1.5" />
+    </svg>
+  ),
+  Muscle: (p) => (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...p}>
+      <rect x="2" y="10" width="20" height="6" rx="3" fill="#C026D3" />
+      <rect x="6" y="7" width="12" height="10" rx="5" fill="#3B82F6" />
+      <rect x="9" y="4" width="6" height="16" rx="3" fill="#fff" />
+    </svg>
+  ),
+  Star: (p) => (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...p}>
+      <polygon points="12,2 15,9 22,9.5 17,14.5 18.5,22 12,18 5.5,22 7,14.5 2,9.5 9,9" fill="url(#grad)" />
+      <defs>
+        <linearGradient id="grad" x1="0" x2="1" y1="1" y2="0">
+          <stop offset="0%" stopColor="#3B82F6" />
+          <stop offset="100%" stopColor="#C026D3" />
+        </linearGradient>
+      </defs>
+    </svg>
+  ),
+  Star: (p) => (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...p}>
+      <polygon points="12,2 15,9 22,9.5 17,14.5 18.5,22 12,18 5.5,22 7,14.5 2,9.5 9,9" fill="url(#grad)" />
+      <defs>
+        <linearGradient id="grad" x1="0" x2="1" y1="1" y2="0">
+          <stop offset="0%" stopColor="#3B82F6" />
+          <stop offset="100%" stopColor="#C026D3" />
+        </linearGradient>
+      </defs>
+    </svg>
+  ),
+  Medal: (p) => (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...p}>
+      <circle cx="12" cy="8" r="6" fill="url(#grad)" />
+      <rect x="9" y="14" width="6" height="7" rx="2" fill="#fff" />
+      <defs>
+        <linearGradient id="grad" x1="0" x2="1" y1="1" y2="0">
+          <stop offset="0%" stopColor="#3B82F6" />
+          <stop offset="100%" stopColor="#C026D3" />
+        </linearGradient>
+      </defs>
+    </svg>
+  ),
   Person: (p) => (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...p}>
       <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z" />
@@ -69,6 +118,12 @@ const Icon = {
   Pencil: (p) => (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...p}>
       <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41L18.37 3.29a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+    </svg>
+  ),
+  Gear: (p) => (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...p}>
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M19.4 13c.04-.33.06-.66.06-1s-.02-.67-.06-1l1.45-1.13a.5.5 0 0 0 .12-.64l-1.38-2.4a.5.5 0 0 0-.6-.23l-1.7.68a7.03 7.03 0 0 0-1.7-.99l-.26-1.81A.5.5 0 0 0 14 3h-2.7a.5.5 0 0 0-.5.42l-.26 1.81c-.6.23-1.17.55-1.7.99l-1.7-.68a.5.5 0 0 0-.6.23l-1.38 2.4a.5.5 0 0 0 .12.64L4.6 11c-.04.33-.06.66-.06 1s.02.67.06 1l-1.45 1.13a.5.5 0 0 0-.12.64l1.38 2.4a.5.5 0 0 0 .6.23l1.7-.68c.53.44 1.1.76 1.7.99l.26 1.81a.5.5 0 0 0 .5.42H14a.5.5 0 0 0 .5-.42l.26-1.81c.6-.23 1.17-.55 1.7-.99l1.7.68a.5.5 0 0 0 .6-.23l1.38-2.4a.5.5 0 0 0-.12-.64L19.4 13z" />
     </svg>
   ),
 };
@@ -323,7 +378,7 @@ const PanelShell = ({ icon, iconBg, title, subtitle, children, rightPill, theme 
   return (
     <div className={
       isLight
-        ? "rounded-2xl p-5 bg-black/5 border border-black/5"
+        ? "rounded-2xl p-5 bg-white text-black border border-black/5"
         : "rounded-2xl p-5 bg-neutral-900/80 text-white border border-white/10"
     }>
       <div className="flex items-center justify-between mb-3">
@@ -348,7 +403,7 @@ const AerobicPanel = ({ ratings, xp, onLongPress, theme }) => {
     { key: "Spe", label: "Speed" },
   ];
   return (
-    <PanelShell icon={<Icon.Trophy className="w-4 h-4" />} iconBg="bg-blue-600/20" title="Aerobic" subtitle="Cardiovascular Training">
+  <PanelShell icon={<Icon.Speed className="w-4 h-4" />} iconBg="bg-blue-600/20" title="Aerobic" subtitle="Cardiovascular Training">
       <div className="grid grid-cols-2 gap-4">
         {blocks.map(({ key, label }) => {
           let timer;
@@ -377,7 +432,7 @@ const AnaerobicPanel = ({ ratings, xp, onLongPress, theme }) => {
     { key: "BaB", label: "Balance & Ball" },
   ];
   return (
-    <PanelShell icon={<Icon.Trophy className="w-4 h-4" />} iconBg="bg-fuchsia-600/20" title="Anaerobic" subtitle="Power & Skill Training">
+  <PanelShell icon={<Icon.Muscle className="w-4 h-4" />} iconBg="bg-fuchsia-600/20" title="Anaerobic" subtitle="Power & Skill Training">
       <div className="grid grid-cols-2 gap-4">
         {blocks.map(({ key, label }) => {
           let timer;
@@ -418,19 +473,24 @@ const Shield = ({ locked }) => {
 const AchievementsPanel = ({ ratings, workouts, theme }) => {
   const unlocked = computeAchievements(ratings, workouts);
   const setUnlocked = new Set(unlocked);
+  const unlockedList = achievementDefs.filter((a) => setUnlocked.has(a.id));
   return (
-    <PanelShell icon={<Icon.Trophy className="w-4 h-4" />} iconBg="bg-white/10" title="Achievements" subtitle="">
-      <div className="grid grid-cols-2 gap-3">
-        {achievementDefs.filter((a) => setUnlocked.has(a.id)).map((a) => (
-          <div key={a.id} className="flex items-center gap-3 rounded-xl p-3 border border-white/15 bg-white/5">
-            <Icon.Trophy className="w-6 h-6" />
-            <div>
-              <div className="text-sm font-semibold tracking-tight">{a.label}</div>
-              <div className="text-[11px] opacity-70">Unlocked</div>
+  <PanelShell icon={<Icon.Star className="w-4 h-4" />} iconBg="bg-white/10" title="Achievements" subtitle="">
+      {unlockedList.length === 0 ? (
+        <div className="text-center text-sm opacity-70 py-6">Keep training and you'll unlock achievements!</div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {unlockedList.map((a) => (
+            <div key={a.id} className="flex items-center gap-3 rounded-xl p-3 border border-white/15 bg-white/5">
+              <Icon.Trophy className="w-6 h-6" />
+              <div>
+                <div className="text-sm font-semibold tracking-tight">{a.label}</div>
+                <div className="text-[11px] opacity-70">Unlocked</div>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </PanelShell>
   );
 };
@@ -506,11 +566,12 @@ const LoggerModal = ({ open, onClose, preset, onSave }) => {
   useEffect(() => setSub(statMeta[stat].subs[0]), [stat]);
   const isAerobic = statMeta[stat].type === "Aerobic";
 
+  const theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
   return (
     <AnimatePresence>
       {open && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm grid place-items-center p-5 z-50">
-          <motion.div initial={{ y: 18, scale: 0.98, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} exit={{ y: 8, scale: 0.99, opacity: 0 }} transition={{ type: "spring", stiffness: 280, damping: 26 }} className="w-full max-w-md rounded-2xl bg-white dark:bg-neutral-900 text-black dark:text-white p-5 shadow-2xl">
+          <motion.div initial={{ y: 18, scale: 0.98, opacity: 0 }} animate={{ y: 0, scale: 1, opacity: 1 }} exit={{ y: 8, scale: 0.99, opacity: 0 }} transition={{ type: "spring", stiffness: 280, damping: 26 }} className={`w-full max-w-md rounded-2xl p-5 shadow-2xl border ${theme === 'dark' ? 'bg-neutral-900/80 text-white border-white/10' : 'bg-white text-black border-black/5'}`}>
             <h3 className="text-lg font-semibold tracking-tight">Log a Training Session</h3>
 
             <label className="block mt-4 text-sm">Characteristic</label>
@@ -761,9 +822,9 @@ function FitcardPrototype() {
         <span>Log a Workout</span>
       </motion.button>
 
-      <AerobicPanel ratings={ratings} xp={xp} onLongPress={(preset) => { setPreset(preset); setLoggerOpen(true); }} />
-      <AnaerobicPanel ratings={ratings} xp={xp} onLongPress={(preset) => { setPreset(preset); setLoggerOpen(true); }} />
-      <AchievementsPanel ratings={ratings} workouts={workouts} />
+  <AerobicPanel ratings={ratings} xp={xp} onLongPress={(preset) => { setPreset(preset); setLoggerOpen(true); }} theme={theme} />
+  <AnaerobicPanel ratings={ratings} xp={xp} onLongPress={(preset) => { setPreset(preset); setLoggerOpen(true); }} theme={theme} />
+  <AchievementsPanel ratings={ratings} workouts={workouts} theme={theme} />
     </div>
   );
 
@@ -812,6 +873,7 @@ function FitcardPrototype() {
 
         {tab === "settings" && (
           <div className="space-y-5">
+            {/* Theme block */}
             <div className={
               theme === "dark"
                 ? "rounded-2xl p-5 bg-white/5 border border-white/10 flex items-center justify-between"
@@ -822,14 +884,53 @@ function FitcardPrototype() {
               </div>
               <motion.button whileTap={{ scale: 0.97 }} onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))} className={
                 theme === "dark"
-                  ? "px-3 py-2 rounded-2xl bg-gradient-to-r from-blue-500 to-fuchsia-600 text-white flex items-center gap-2"
-                  : "px-3 py-2 rounded-2xl bg-black text-white flex items-center gap-2 border border-black"
+                  ? "px-3 py-2 rounded-2xl bg-gradient-to-r from-blue-500 to-fuchsia-600 text-white"
+                  : "px-3 py-2 rounded-2xl bg-black text-white border border-black"
               }>
-                {theme === "dark" ? <Icon.Sun className="w-4 h-4" /> : <Icon.Moon className="w-4 h-4" />}
                 {theme === "dark" ? "Light mode" : "Dark mode"}
               </motion.button>
             </div>
 
+            {/* Backup & Restore — самостоятельный блок */}
+            <div className={
+              theme === "dark"
+                ? "rounded-2xl p-5 bg-white/5 border border-white/10"
+                : "rounded-2xl p-5 bg-white border border-black/5"
+            }>
+              <div className="font-semibold tracking-tight mb-2">Backup & Restore</div>
+              <div className="flex gap-2">
+                <button
+                  className="px-3 py-2 rounded-xl bg-blue-500 text-white"
+                  onClick={() => {
+                    const data = localStorage.getItem('fitcard-user');
+                    const blob = new Blob([data || '{}'], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'fitcard-backup.json';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                >Export Data</button>
+                <label className="px-3 py-2 rounded-xl bg-fuchsia-500 text-white cursor-pointer">
+                  Import Data
+                  <input type="file" accept="application/json" className="hidden" onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const text = await file.text();
+                    try {
+                      const obj = JSON.parse(text);
+                      localStorage.setItem('fitcard-user', JSON.stringify(obj));
+                      window.location.reload();
+                    } catch {
+                      alert('Invalid file');
+                    }
+                  }} />
+                </label>
+              </div>
+            </div>
+
+            {/* Weekly Goal block */}
             <div className={
               theme === "dark"
                 ? "rounded-2xl p-5 bg-white/5 border border-white/10 flex items-center justify-between"
@@ -846,6 +947,7 @@ function FitcardPrototype() {
               </div>
             </div>
 
+            {/* Google Auth Panel */}
             <GoogleAuthPanel
               user={user}
               onSignIn={handleGoogleSignIn}
@@ -886,7 +988,9 @@ if (typeof window !== "undefined" && !window.__FITCARD_TESTED__) {
   console.assert(r2.rating === 53 && r2.xp === 0, "applyXp should handle multiple level-ups correctly");
   // achievements (original)
   console.assert(computeAchievements(Object.fromEntries(statList.map((k) => [k, 50])), []).length === 0, "no achievements at baseline");
-  console.assert(computeAchievements({ Sta: 60, Fle: 50, Spe: 50, Arm: 50, Leg: 50, FrB: 50, BaB: 50 }, []).includes("any_60"), "any_60 should unlock when a stat reaches 60");
+  // Проверяем достижение по одной характеристике (например, sta_60)
+  console.assert(computeAchievements({ Sta: 60, Fle: 50, Spe: 50, Arm: 50, Leg: 50, FrB: 50, BaB: 50 }, []).includes("sta_60"), "sta_60 should unlock when Sta reaches 60");
+  // Проверяем достижение по OVR
   console.assert(computeAchievements(Object.fromEntries(statList.map((k) => [k, 60])), []).includes("ovr_60"), "ovr_60 should unlock when overall >= 60");
   console.assert(computeAchievements(Object.fromEntries(statList.map((k) => [k, 50])), [{ date: "2025-01-01" }]).includes("first_session"), "first_session should unlock after first workout");
   // isoWeek sanity

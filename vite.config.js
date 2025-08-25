@@ -6,7 +6,7 @@ export default defineConfig({
   base: '',   // <-- для мобильной сборки путь должен быть относительным
   server: {
     host: true,
-    port: 5173,
+  port: 5178,
     strictPort: true
   }
 })
