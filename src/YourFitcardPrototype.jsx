@@ -110,7 +110,6 @@ const Header = () => (
       <Logo className="w-8 h-8" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-fuchsia-600">Fitcard</h1>
-        <p className="text-xs text-neutral-600 dark:text-neutral-400 -mt-0.5">Player development card</p>
       </div>
     </div>
   </header>
@@ -301,23 +300,31 @@ const ProgressBar = ({ value, max }) => {
   );
 };
 
-const PanelShell = ({ icon, iconBg, title, subtitle, children, rightPill }) => (
-  <div className="rounded-2xl p-5 bg-neutral-900/80 text-white border border-white/10">
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-3">
-        <div className={`w-8 h-8 rounded-xl grid place-items-center ${iconBg}`}>{icon}</div>
-        <div>
-          <div className="font-semibold tracking-tight">{title}</div>
-          <div className="text-[12px] opacity-70">{subtitle}</div>
+const PanelShell = ({ icon, iconBg, title, subtitle, children, rightPill, theme }) => {
+  // theme: 'dark' | 'light' | undefined
+  const isLight = theme === 'light';
+  return (
+    <div className={
+      isLight
+        ? "rounded-2xl p-5 bg-black/5 border border-black/5"
+        : "rounded-2xl p-5 bg-neutral-900/80 text-white border border-white/10"
+    }>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div className={`w-8 h-8 rounded-xl grid place-items-center ${iconBg}`}>{icon}</div>
+          <div>
+            <div className="font-semibold tracking-tight">{title}</div>
+            <div className="text-[12px] opacity-70">{subtitle}</div>
+          </div>
         </div>
+        {rightPill}
       </div>
-      {rightPill}
+      {children}
     </div>
-    {children}
-  </div>
-);
+  );
+};
 
-const AerobicPanel = ({ ratings, xp, onLongPress }) => {
+const AerobicPanel = ({ ratings, xp, onLongPress, theme }) => {
   const blocks = [
     { key: "Sta", label: "Stamina" },
     { key: "Fle", label: "Flexibility" },
@@ -345,7 +352,7 @@ const AerobicPanel = ({ ratings, xp, onLongPress }) => {
   );
 };
 
-const AnaerobicPanel = ({ ratings, xp, onLongPress }) => {
+const AnaerobicPanel = ({ ratings, xp, onLongPress, theme }) => {
   const blocks = [
     { key: "Arm", label: "Arm Strength" },
     { key: "Leg", label: "Leg Power" },
@@ -391,7 +398,7 @@ const Shield = ({ locked }) => {
   );
 };
 
-const AchievementsPanel = ({ ratings, workouts }) => {
+const AchievementsPanel = ({ ratings, workouts, theme }) => {
   const unlocked = computeAchievements(ratings, workouts);
   const setUnlocked = new Set(unlocked);
   return (
@@ -414,30 +421,39 @@ const AchievementsPanel = ({ ratings, workouts }) => {
   );
 };
 
-const GoogleAuthPanel = ({ user, onSignIn, onSignOut, onSave, onLoad }) => (
-  <div className="rounded-2xl p-5 bg-white/5 border border-white/10 flex items-center justify-between">
-    <div>
-      <div className="font-semibold tracking-tight">Account</div>
-      <div className="text-sm opacity-70">{user ? `Signed in as ${user.email}` : 'Sign in with Google to sync progress'}</div>
+import { useState as useLocalState } from "react";
+const GoogleAuthPanel = ({ user, onSignIn, onSignOut, onSave, onLoad, theme }) => {
+  const [synced, setSynced] = useLocalState(false);
+  const handleSave = () => {
+    onSave();
+    setSynced(true);
+    setTimeout(() => setSynced(false), 2000);
+  return (
+    <div className={
+      theme === "dark"
+        ? "rounded-2xl p-5 bg-white/5 border border-white/10 flex items-center justify-between"
+        : "rounded-2xl p-5 bg-black/5 border border-black/5 flex items-center justify-between"
+    }>
+      <div>
+        <div className="font-semibold tracking-tight">Save the progress</div>
+        <div className="text-sm opacity-70">{user ? `Signed in as ${user.email}` : 'Use your Google account to save and sync your workouts'}</div>
+      </div>
+      <div className="flex items-center gap-2">
+        {!user ? (
+          <motion.button whileTap={{ scale: 0.97 }} onClick={onSignIn} className="px-3 py-2 rounded-xl bg-white text-black flex items-center gap-2">
+            <svg viewBox="0 0 533.5 544.3" className="w-4 h-4"><path fill="#4285F4" d="M533.5 278.4c0-18.6-1.7-36.4-4.9-53.7H272v101.7h146.9c-6.3 34.1-25.2 63-53.7 82.3v68.4h86.9c50.9-46.9 81.4-116 81.4-198.7z"/><path fill="#34A853" d="M272 544.3c72.9 0 134.1-24.1 178.8-65.6l-86.9-68.4c-24.1 16.2-54.9 25.9-91.9 25.9-70.6 0-130.5-47.6-152-111.6H30.9v69.9C75.4 486.2 167.1 544.3 272 544.3z"/><path fill="#FBBC05" d="M120 324.6c-10.1-30.1-10.1-62.5 0-92.6V162.1h-89.1c-38.5 76.9-38.5 167.9 0 244.7l89.1-82.2z"/><path fill="#EA4335" d="M272 107.7c39.6-.6 77.4 13.9 106.3 39.4l79.3-79.3C411.6 24.5 344.9-.1 272 0 167.1 0 75.4 57.9 30.9 162.1l89.1 69.9c21.5-64 81.4-111.6 152-111.6z"/></svg>
+            <span>Log in</span>
+          </motion.button>
+        ) : (
+          <div className="flex items-center gap-2">
+            <button onClick={handleSave} className="px-3 py-2 rounded-xl bg-white/10">{synced ? "Synced" : "Save"}</button>
+            <button onClick={onLoad} className="px-3 py-2 rounded-xl bg-white/10">Load</button>
+            <button onClick={onSignOut} className="px-3 py-2 rounded-xl bg-white/10">Sign out</button>
+          </div>
+        )}
+      </div>
     </div>
-    <div className="flex items-center gap-2">
-      {!user ? (
-        <motion.button whileTap={{ scale: 0.97 }} onClick={onSignIn} className="px-3 py-2 rounded-xl bg-white text-black flex items-center gap-2">
-          <svg viewBox="0 0 533.5 544.3" className="w-4 h-4"><path fill="#4285F4" d="M533.5 278.4c0-18.6-1.7-36.4-4.9-53.7H272v101.7h146.9c-6.3 34.1-25.2 63-53.7 82.3v68.4h86.9c50.9-46.9 81.4-116 81.4-198.7z"/><path fill="#34A853" d="M272 544.3c72.9 0 134.1-24.1 178.8-65.6l-86.9-68.4c-24.1 16.2-54.9 25.9-91.9 25.9-70.6 0-130.5-47.6-152-111.6H30.9v69.9C75.4 486.2 167.1 544.3 272 544.3z"/><path fill="#FBBC05" d="M120 324.6c-10.1-30.1-10.1-62.5 0-92.6V162.1h-89.1c-38.5 76.9-38.5 167.9 0 244.7l89.1-82.2z"/><path fill="#EA4335" d="M272 107.7c39.6-.6 77.4 13.9 106.3 39.4l79.3-79.3C411.6 24.5 344.9-.1 272 0 167.1 0 75.4 57.9 30.9 162.1l89.1 69.9c21.5-64 81.4-111.6 152-111.6z"/></svg>
-          <span>Sign in with Google</span>
-        </motion.button>
-      ) : (
-        <div className="flex items-center gap-2">
-          <button onClick={onSave} className="px-3 py-2 rounded-xl bg-white/10">Save</button>
-          <button onClick={onLoad} className="px-3 py-2 rounded-xl bg-white/10">Load</button>
-          <button onClick={onSignOut} className="px-3 py-2 rounded-xl bg-white/10">Sign out</button>
-        </div>
-      )}
-    </div>
-  </div>
-);
-
-// ---------------- Date helpers ----------------
+  );
 const startOfWeek = (date) => {
   const d = new Date(date);
   const day = d.getDay(); // 0 Sun .. 6 Sat
@@ -577,8 +593,14 @@ const WeekCalendar = ({ workouts, weekOffset, setWeekOffset, weeklyGoal = 5 }) =
 
 // ---------------- Main Prototype ----------------
 export default function FitcardPrototype() {
-  const prefersDark = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const [theme, setTheme] = useState(prefersDark ? "dark" : "light");
+  // По умолчанию dark
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== "undefined") {
+      // Можно добавить localStorage/theme, если нужно
+      return "dark";
+    }
+    return "dark";
+  });
   const [tab, setTab] = useState("stats");
 
   // Local demo store
@@ -642,7 +664,13 @@ export default function FitcardPrototype() {
   // Theme effect
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === "dark") root.classList.add("dark"); else root.classList.remove("dark");
+    if (theme === "dark") {
+      root.classList.add("dark");
+      root.classList.remove("light");
+    } else {
+      root.classList.remove("dark");
+      root.classList.add("light");
+    }
   }, [theme]);
 
   const drawCardToCanvas = async () => {
@@ -724,16 +752,33 @@ export default function FitcardPrototype() {
   );
 
   return (
-    <div className="min-h-[640px] h-[100vh] bg-gradient-to-b from-neutral-950 via-neutral-950 to-neutral-900 text-white">
+    <div className={
+      `min-h-screen h-full w-full ${theme === "dark" ? "bg-neutral-950 text-white" : "bg-white text-black"}`
+    }>
       <Header />
 
       <main className="mx-auto max-w-md px-5 pt-5 pb-28">
-        {tab === "stats" && body}
+        {tab === "stats" && (
+          <div className="space-y-5">
+            <PlayerCard name={name} setName={setName} avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} ratings={ratings} onLongShare={shareCard} />
+            <motion.button whileTap={{ scale: 0.98 }} onClick={() => setLoggerOpen(true)} className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-semibold shadow-lg flex items-center justify-center gap-2">
+              <Icon.Plus className="w-4 h-4 fill-white" />
+              <span>Log a Workout</span>
+            </motion.button>
+            <AerobicPanel ratings={ratings} xp={xp} onLongPress={(preset) => { setPreset(preset); setLoggerOpen(true); }} theme={theme} />
+            <AnaerobicPanel ratings={ratings} xp={xp} onLongPress={(preset) => { setPreset(preset); setLoggerOpen(true); }} theme={theme} />
+            <AchievementsPanel ratings={ratings} workouts={workouts} theme={theme} />
+          </div>
+        )}
 
         {tab === "season" && (
           <div className="space-y-5">
             <WeekCalendar workouts={workouts} weekOffset={weekOffset} setWeekOffset={setWeekOffset} weeklyGoal={weeklyGoal} />
-            <div className="rounded-2xl p-5 bg-black/5 dark:bg-white/10 border border-white/10">
+            <div className={
+              theme === "dark"
+                ? "rounded-2xl p-5 bg-black/5 dark:bg-white/10 border border-white/10"
+                : "rounded-2xl p-5 bg-white border border-black/10"
+            }>
               <div className="font-semibold mb-2 tracking-tight">Last Progress</div>
               <ul className="space-y-2 text-sm">
                 {lastUniqueDays.length === 0 && <li className="opacity-60">No progress yet. Log a training session!</li>}
@@ -741,7 +786,7 @@ export default function FitcardPrototype() {
                   <li key={i} className="flex justify-between items-center gap-2">
                     <span className="opacity-80">{p.date}</span>
                     <span className="font-medium">{p.stat}</span>
-                    <span className="px-2 py-0.5 rounded-full bg-white/10 text-[11px]">Rating {p.after}</span>
+                    <span className={theme === "dark" ? "px-2 py-0.5 rounded-full bg-white/10 text-[11px]" : "px-2 py-0.5 rounded-full bg-black/10 text-[11px]"}>Rating {p.after}</span>
                   </li>
                 ))}
               </ul>
@@ -751,26 +796,37 @@ export default function FitcardPrototype() {
 
         {tab === "settings" && (
           <div className="space-y-5">
-            <div className="rounded-2xl p-5 bg-white/5 border border-white/10 flex items-center justify-between">
+            <div className={
+              theme === "dark"
+                ? "rounded-2xl p-5 bg-white/5 border border-white/10 flex items-center justify-between"
+                : "rounded-2xl p-5 bg-white border border-black/10 flex items-center justify-between"
+            }>
               <div>
                 <div className="font-semibold tracking-tight">Theme</div>
-                <div className="text-sm opacity-70">Light / Dark</div>
               </div>
-              <motion.button whileTap={{ scale: 0.97 }} onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))} className="px-3 py-2 rounded-2xl bg-gradient-to-r from-blue-500 to-fuchsia-600 text-white flex items-center gap-2">
+              <motion.button whileTap={{ scale: 0.97 }} onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))} className={
+                theme === "dark"
+                  ? "px-3 py-2 rounded-2xl bg-gradient-to-r from-blue-500 to-fuchsia-600 text-white flex items-center gap-2"
+                  : "px-3 py-2 rounded-2xl bg-black text-white flex items-center gap-2 border border-black"
+              }>
                 {theme === "dark" ? <Icon.Sun className="w-4 h-4" /> : <Icon.Moon className="w-4 h-4" />}
                 {theme === "dark" ? "Light mode" : "Dark mode"}
               </motion.button>
             </div>
 
-            <div className="rounded-2xl p-5 bg-white/5 border border-white/10 flex items-center justify-between">
+            <div className={
+              theme === "dark"
+                ? "rounded-2xl p-5 bg-white/5 border border-white/10 flex items-center justify-between"
+                : "rounded-2xl p-5 bg-white border border-black/10 flex items-center justify-between"
+            }>
               <div>
                 <div className="font-semibold tracking-tight">Weekly Goal</div>
                 <div className="text-sm opacity-70">Target training sessions per week</div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => setWeeklyGoal((g) => Math.max(1, g - 1))} className="px-2 py-1 rounded-xl bg-white/10">–</button>
-                <input type="number" min="1" max="7" value={weeklyGoal} onChange={(e) => setWeeklyGoal(Math.max(1, Math.min(7, +e.target.value || 1)))} className="w-16 px-2 py-1 rounded-xl bg-white/10 text-center" />
-                <button onClick={() => setWeeklyGoal((g) => Math.min(7, g + 1))} className="px-2 py-1 rounded-xl bg-white/10">+</button>
+                <button onClick={() => setWeeklyGoal((g) => Math.max(1, g - 1))} className={theme === "dark" ? "px-2 py-1 rounded-xl bg-white/10" : "px-2 py-1 rounded-xl bg-black/10"}>–</button>
+                <input type="number" min="1" max="7" value={weeklyGoal} onChange={(e) => setWeeklyGoal(Math.max(1, Math.min(7, +e.target.value || 1)))} className={theme === "dark" ? "w-16 px-2 py-1 rounded-xl bg-white/10 text-center" : "w-16 px-2 py-1 rounded-xl bg-black/10 text-center"} />
+                <button onClick={() => setWeeklyGoal((g) => Math.min(7, g + 1))} className={theme === "dark" ? "px-2 py-1 rounded-xl bg-white/10" : "px-2 py-1 rounded-xl bg-black/10"}>+</button>
               </div>
             </div>
 
@@ -780,6 +836,7 @@ export default function FitcardPrototype() {
               onSignOut={handleGoogleSignOut}
               onSave={saveProgressToCloud}
               onLoad={loadProgressFromCloud}
+              theme={theme}
             />
           </div>
         )}
