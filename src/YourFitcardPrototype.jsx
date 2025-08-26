@@ -731,7 +731,7 @@ function FitcardPrototype() {
 
   // Calendar + settings
   const [weekOffset, setWeekOffset] = useState(0);
-  const [weeklyGoal, setWeeklyGoal] = useState(5);
+  // weeklyGoal уже объявлен выше с инициализацией из localStorage
 
   // Sharing canvas
   const canvasRef = useRef(null);
@@ -882,7 +882,7 @@ function FitcardPrototype() {
 
   const body = (
     <div className="space-y-5">
-      <div className="pt-[env(safe-area-inset-top,32px)]">
+      <div className="pt-[env(safe-area-inset-top,32px)] mt-[15px]">
         <PlayerCard name={name} setName={setName} avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} ratings={ratings} onLongShare={shareCard} />
       </div>
 
@@ -905,7 +905,9 @@ function FitcardPrototype() {
   <main className="mx-auto max-w-md px-5 pt-[env(safe-area-inset-top,32px)] pb-28">
         {tab === "stats" && (
           <div className="space-y-5">
-            <PlayerCard name={name} setName={setName} avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} ratings={ratings} onLongShare={shareCard} />
+            <div className="mt-[40px]">
+              <PlayerCard name={name} setName={setName} avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} ratings={ratings} onLongShare={shareCard} />
+            </div>
             <motion.button whileTap={{ scale: 0.98 }} onClick={() => setLoggerOpen(true)} className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-semibold shadow-lg flex items-center justify-center gap-2">
               <Icon.Plus className="w-4 h-4 fill-white" />
               <span>Log a Workout</span>
