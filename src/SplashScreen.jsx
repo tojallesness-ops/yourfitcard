@@ -7,7 +7,7 @@ export default function SplashScreen({ onFinish, theme }) {
   }, [onFinish]);
 
   return (
-    <div className={`fixed inset-0 flex flex-col justify-between items-center min-h-screen w-full z-50 transition-colors duration-300 ${theme === "dark" ? "bg-neutral-950 text-white" : "bg-white text-black"}`}>
+  <div className="fixed inset-0 flex flex-col justify-between items-center min-h-screen w-full z-50 transition-colors duration-300 bg-neutral-950 text-white">
       <div />
       <div className="flex flex-col items-center gap-4">
         <img src="/icon.svg" alt="Fitcard logo" className="w-20 h-20 mb-2" />

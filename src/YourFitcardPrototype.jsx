@@ -242,9 +242,17 @@ const EditableName = ({ value, onSave }) => {
   const [val, setVal] = useState(value);
   useEffect(() => setVal(value), [value]);
   return editing ? (
-    <div className="flex items-center gap-2">
-      <input className="px-2.5 py-1.5 rounded-xl bg-white/20 dark:bg-white/10 outline-none" value={val} onChange={(e) => setVal(e.target.value)} />
-      <motion.button whileTap={{ scale: 0.96 }} onClick={() => { onSave(val || "You"); setEditing(false); }} className="px-2.5 py-1.5 bg-white/10 rounded-xl">Save</motion.button>
+    <div className="flex items-center gap-2 w-full max-w-[180px]">
+      <input
+        className="px-2.5 py-1.5 rounded-xl bg-white/20 dark:bg-white/10 outline-none flex-1 min-w-0"
+        value={val}
+        onChange={e => setVal(e.target.value.slice(0, 16))}
+        maxLength={16}
+        autoFocus
+        inputMode="text"
+        onFocus={e => e.target.select()}
+      />
+      <motion.button whileTap={{ scale: 0.96 }} onClick={() => { onSave(val.trim() || "You"); setEditing(false); }} className="px-2.5 py-1.5 bg-white/10 rounded-xl">Save</motion.button>
     </div>
   ) : (
     <div className="flex items-center gap-1">
@@ -336,11 +344,10 @@ const PlayerCard = ({ name, setName, avatarUrl, setAvatarUrl, ratings, onLongSha
       {/* Avatar Modal */}
       <AnimatePresence>
         {avatarOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/65 backdrop-blur-sm grid place-items-center p-5">
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} transition={{ type: "spring", stiffness: 240, damping: 24 }} className="bg-white dark:bg-neutral-900 text-black dark:text-white rounded-2xl p-5 w-full max-w-sm shadow-2xl">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col justify-center items-center p-0">
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} transition={{ type: "spring", stiffness: 240, damping: 24 }} className="bg-white dark:bg-neutral-900 text-black dark:text-white rounded-2xl p-6 w-full max-w-xs mx-4 shadow-2xl">
               <h3 className="font-semibold text-lg tracking-tight">Avatar Image</h3>
               <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Paste an image URL (300kb recommended). Leave empty to remove.</p>
-              <input value={tmpUrl} onChange={(e) => setTmpUrl(e.target.value)} className="mt-3 w-full px-3 py-2 rounded-xl bg-black/5 dark:bg-white/10 outline-none" placeholder="https://..." />
               <div className="mt-3 text-xs opacity-70">or upload an image (≤300kb)</div>
               <input type="file" accept="image/*" className="mt-1 w-full text-sm" onChange={(e) => {
                 const f = e.target.files?.[0];
@@ -832,9 +839,8 @@ function FitcardPrototype() {
     <div className={
       `min-h-screen h-full w-full ${theme === "dark" ? "bg-neutral-950 text-white" : "bg-white text-black"}`
     }>
-      <Header />
-
-      <main className="mx-auto max-w-md px-5 pt-5 pb-28">
+  {/* Убрали Header, добавили безопасный отступ сверху */}
+  <main className="mx-auto max-w-md px-5 pt-[env(safe-area-inset-top,32px)] pb-28">
         {tab === "stats" && (
           <div className="space-y-5">
             <PlayerCard name={name} setName={setName} avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} ratings={ratings} onLongShare={shareCard} />
