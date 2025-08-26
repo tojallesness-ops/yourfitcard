@@ -1,5 +1,16 @@
 import { useMemo, useState, useEffect, useRef, useId } from "react";
 import { useState as useLocalState } from "react";
+
+// Google Identity Services loader
+const loadGoogleScript = () => {
+  if (document.getElementById('google-identity')) return;
+  const script = document.createElement('script');
+  script.src = 'https://accounts.google.com/gsi/client';
+  script.async = true;
+  script.defer = true;
+  script.id = 'google-identity';
+  document.body.appendChild(script);
+};
 import { motion, AnimatePresence } from "framer-motion";
 
 // =============================================
@@ -687,13 +698,32 @@ function FitcardPrototype() {
   });
   const [tab, setTab] = useState("stats");
 
-  // Local demo store
-  const [name, setName] = useState("You");
-  const [avatarUrl, setAvatarUrl] = useState("");
-  const [ratings, setRatings] = useState(() => Object.fromEntries(statList.map((k) => [k, 50])));
-  const [xp, setXp] = useState(() => Object.fromEntries(statList.map((k) => [k, 0])));
-  const [workouts, setWorkouts] = useState([]);
-  const [progress, setProgress] = useState([]);
+  // --- Local progress persistence ---
+  const defaultState = {
+    name: "You",
+    avatarUrl: "",
+    ratings: Object.fromEntries(statList.map((k) => [k, 50])),
+    xp: Object.fromEntries(statList.map((k) => [k, 0])),
+    workouts: [],
+    progress: [],
+    weeklyGoal: 5,
+  };
+  // Загрузка из localStorage
+  let initial = defaultState;
+  try {
+    const raw = localStorage.getItem('fitcard-user');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      initial = { ...defaultState, ...parsed };
+    }
+  } catch {}
+  const [name, setName] = useState(initial.name);
+  const [avatarUrl, setAvatarUrl] = useState(initial.avatarUrl);
+  const [ratings, setRatings] = useState(initial.ratings);
+  const [xp, setXp] = useState(initial.xp);
+  const [workouts, setWorkouts] = useState(initial.workouts);
+  const [progress, setProgress] = useState(initial.progress);
+  const [weeklyGoal, setWeeklyGoal] = useState(initial.weeklyGoal);
 
   // Logger modal
   const [loggerOpen, setLoggerOpen] = useState(false);
@@ -706,7 +736,7 @@ function FitcardPrototype() {
   // Sharing canvas
   const canvasRef = useRef(null);
 
-  // ---- Google Sign-In (prototype wiring) ----
+  // ---- Google Sign-In (real GIS) ----
   const [user, setUser] = useState(null);
   const snapshot = () => ({ name, avatarUrl, ratings, xp, workouts, progress, weeklyGoal });
   const applySnapshot = (s) => {
@@ -734,16 +764,46 @@ function FitcardPrototype() {
       alert('Progress loaded');
     } catch { alert('Load failed'); }
   };
+  // Google Sign-In через GIS
+  useEffect(() => { loadGoogleScript(); }, []);
   const handleGoogleSignIn = async () => {
-    try {
-      const email = window.prompt('Enter Google email to sign in (prototype):');
-      if (!email) return;
-      setUser({ email, displayName: email.split('@')[0] });
-      const raw = localStorage.getItem(cloudKey(email));
-      if (raw) applySnapshot(JSON.parse(raw));
-    } catch {}
+    if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+      alert('Google Identity Services не загружены');
+      return;
+    }
+    window.google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        alert('Google Sign-In отменён или недоступен');
+      }
+    });
+    window.google.accounts.id.initialize({
+      client_id: '625171210112-28d0ohk62ad512jsqpjcmdan341n14fd.apps.googleusercontent.com',
+      callback: (response) => {
+        // Получаем id_token, декодируем email
+        const base64Url = response.credential.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        const payload = JSON.parse(jsonPayload);
+        setUser({ email: payload.email, displayName: payload.name || payload.email.split('@')[0] });
+        // Автоматически подтянуть cloud save, если есть
+        const raw = localStorage.getItem(cloudKey(payload.email));
+        if (raw) applySnapshot(JSON.parse(raw));
+      },
+      ux_mode: 'popup',
+      auto_select: true,
+    });
+    window.google.accounts.id.prompt();
   };
   const handleGoogleSignOut = () => { setUser(null); };
+  // --- Сохранять прогресс локально при изменениях ---
+  useEffect(() => {
+    const data = snapshot();
+    try {
+      localStorage.setItem('fitcard-user', JSON.stringify(data));
+    } catch {}
+  }, [name, avatarUrl, ratings, xp, workouts, progress, weeklyGoal]);
 
   // Theme effect
   useEffect(() => {
