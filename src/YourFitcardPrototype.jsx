@@ -1,15 +1,28 @@
 import { useMemo, useState, useEffect, useRef, useId } from "react";
 import { useState as useLocalState } from "react";
 
-// Google Identity Services loader
+// Google Identity Services loader (Promise-based)
 const loadGoogleScript = () => {
-  if (document.getElementById('google-identity')) return;
-  const script = document.createElement('script');
-  script.src = 'https://accounts.google.com/gsi/client';
-  script.async = true;
-  script.defer = true;
-  script.id = 'google-identity';
-  document.body.appendChild(script);
+  return new Promise((resolve, reject) => {
+    if (window.google && window.google.accounts && window.google.accounts.id) return resolve();
+    if (document.getElementById('google-identity')) {
+      // script есть, но возможно еще не загрузился
+      const check = () => {
+        if (window.google && window.google.accounts && window.google.accounts.id) resolve();
+        else setTimeout(check, 50);
+      };
+      check();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.id = 'google-identity';
+    script.onload = () => resolve();
+    script.onerror = reject;
+    document.body.appendChild(script);
+  });
 };
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -765,8 +778,31 @@ function FitcardPrototype() {
     } catch { alert('Load failed'); }
   };
   // Google Sign-In через GIS
-  useEffect(() => { loadGoogleScript(); }, []);
+  useEffect(() => {
+    loadGoogleScript().then(() => {
+      if (window.google && window.google.accounts && window.google.accounts.id && !window._gis_initialized) {
+        window.google.accounts.id.initialize({
+          client_id: '625171210112-28d0ohk62ad512jsqpjcmdan341n14fd.apps.googleusercontent.com',
+          callback: (response) => {
+            const base64Url = response.credential.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            const payload = JSON.parse(jsonPayload);
+            setUser({ email: payload.email, displayName: payload.name || payload.email.split('@')[0] });
+            const raw = localStorage.getItem(cloudKey(payload.email));
+            if (raw) applySnapshot(JSON.parse(raw));
+          },
+          ux_mode: 'popup',
+          auto_select: true,
+        });
+        window._gis_initialized = true;
+      }
+    });
+  }, []);
   const handleGoogleSignIn = async () => {
+    await loadGoogleScript();
     if (!window.google || !window.google.accounts || !window.google.accounts.id) {
       alert('Google Identity Services не загружены');
       return;
@@ -776,25 +812,6 @@ function FitcardPrototype() {
         alert('Google Sign-In отменён или недоступен');
       }
     });
-    window.google.accounts.id.initialize({
-      client_id: '625171210112-28d0ohk62ad512jsqpjcmdan341n14fd.apps.googleusercontent.com',
-      callback: (response) => {
-        // Получаем id_token, декодируем email
-        const base64Url = response.credential.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        const payload = JSON.parse(jsonPayload);
-        setUser({ email: payload.email, displayName: payload.name || payload.email.split('@')[0] });
-        // Автоматически подтянуть cloud save, если есть
-        const raw = localStorage.getItem(cloudKey(payload.email));
-        if (raw) applySnapshot(JSON.parse(raw));
-      },
-      ux_mode: 'popup',
-      auto_select: true,
-    });
-    window.google.accounts.id.prompt();
   };
   const handleGoogleSignOut = () => { setUser(null); };
   // --- Сохранять прогресс локально при изменениях ---
@@ -978,8 +995,13 @@ function FitcardPrototype() {
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = 'fitcard-backup.json';
+                    document.body.appendChild(a);
                     a.click();
-                    URL.revokeObjectURL(url);
+                    setTimeout(() => {
+                      URL.revokeObjectURL(url);
+                      a.remove();
+                      alert('Данные успешно экспортированы и сохранены на устройстве.');
+                    }, 100);
                   }}
                 >Export Data</button>
                 <label className="px-3 py-2 rounded-xl bg-fuchsia-500 text-white cursor-pointer">
