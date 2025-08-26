@@ -901,8 +901,8 @@ function FitcardPrototype() {
     <div className={
       `min-h-screen h-full w-full ${theme === "dark" ? "bg-neutral-950 text-white" : "bg-white text-black"}`
     }>
-  {/* Убрали Header, добавили безопасный отступ сверху */}
-  <main className="mx-auto max-w-md px-5 pt-[env(safe-area-inset-top,32px)] pb-28">
+  {/* Убрали Header, safe-area теперь глобально через CSS */}
+  <main className="mx-auto max-w-md px-5 pb-28">
         {tab === "stats" && (
           <div className="space-y-5">
             <div style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 32px)' }}>
