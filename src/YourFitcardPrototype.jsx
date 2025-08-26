@@ -905,7 +905,7 @@ function FitcardPrototype() {
   <main className="mx-auto max-w-md px-5 pt-[env(safe-area-inset-top,32px)] pb-28">
         {tab === "stats" && (
           <div className="space-y-5">
-            <div className="mt-[40px]">
+            <div style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 32px)' }}>
               <PlayerCard name={name} setName={setName} avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} ratings={ratings} onLongShare={shareCard} />
             </div>
             <motion.button whileTap={{ scale: 0.98 }} onClick={() => setLoggerOpen(true)} className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-semibold shadow-lg flex items-center justify-center gap-2">
