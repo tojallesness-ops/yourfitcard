@@ -1,5 +1,8 @@
+
 import { useMemo, useState, useEffect, useRef, useId } from "react";
 import { useState as useLocalState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
 
 // Google Identity Services loader (Promise-based)
 const loadGoogleScript = () => {
@@ -24,18 +27,6 @@ const loadGoogleScript = () => {
     document.body.appendChild(script);
   });
 };
-import { motion, AnimatePresence } from "framer-motion";
-
-// =============================================
-// FITCARD – INTERACTIVE PROTOTYPE (stable build)
-// - Clean, working UI prototype
-// - Avatar URL/file upload (≤300kb), editable name
-// - Long‑press stat → preset logger
-// - Long‑press player card → share/download PNG
-// - Season tab with ISO week numbering + weekly goal
-// - Settings: theme + prototype Google sign‑in with Save/Load (localStorage key by email)
-// - Original achievement logic kept for tests (no badges on PlayerCard per request)
-// =============================================
 
 // ---------------- Icons (inline SVG) ----------------
 const Icon = {
@@ -52,17 +43,6 @@ const Icon = {
       <rect x="2" y="10" width="20" height="6" rx="3" fill="#C026D3" />
       <rect x="6" y="7" width="12" height="10" rx="5" fill="#3B82F6" />
       <rect x="9" y="4" width="6" height="16" rx="3" fill="#fff" />
-    </svg>
-  ),
-  Star: (p) => (
-    <svg viewBox="0 0 24 24" aria-hidden="true" {...p}>
-      <polygon points="12,2 15,9 22,9.5 17,14.5 18.5,22 12,18 5.5,22 7,14.5 2,9.5 9,9" fill="url(#grad)" />
-      <defs>
-        <linearGradient id="grad" x1="0" x2="1" y1="1" y2="0">
-          <stop offset="0%" stopColor="#3B82F6" />
-          <stop offset="100%" stopColor="#C026D3" />
-        </linearGradient>
-      </defs>
     </svg>
   ),
   Star: (p) => (
@@ -153,15 +133,15 @@ const Icon = {
 };
 
 // ---------------- Helpers ----------------
-const statList = ["Sta", "Fle", "Spe", "Arm", "Leg", "FrB", "BaB"];
+const statList = ["Arm", "FrB", "BaB", "Leg", "Sta", "Fle", "Spe"];
 const statMeta = {
+  Arm: { name: "Arms", type: "Anaerobic", subs: ["Biceps", "Triceps", "Forearm", "Shoulders"] },
+  FrB: { name: "Front Body", type: "Anaerobic", subs: ["Chest", "Abdominal Muscles", "Oblique Muscles"] },
+  BaB: { name: "Back Body", type: "Anaerobic", subs: ["Neck", "Upper Muscles", "Lower Muscles"] },
+  Leg: { name: "Legs", type: "Anaerobic", subs: ["Buttocks", "Quadriceps", "Back of thigh", "Calves"] },
   Sta: { name: "Stamina", type: "Aerobic", subs: ["Running", "Cycling", "Rowing", "Swimming"] },
-  Spe: { name: "Speed", type: "Aerobic", subs: ["Sprints", "Intervals", "Track"] },
   Fle: { name: "Flexibility", type: "Aerobic", subs: ["Yoga", "Stretching", "Pilates"] },
-  Arm: { name: "Arm Strength", type: "Anaerobic", subs: ["Biceps", "Triceps", "Shoulders", "Chest"] },
-  Leg: { name: "Leg Power", type: "Anaerobic", subs: ["Quads", "Hamstrings", "Calves", "Glutes"] },
-  FrB: { name: "Functional Body", type: "Anaerobic", subs: ["Core", "Pullups", "Pushups", "Bodyweight"] },
-  BaB: { name: "Balance & Ball", type: "Anaerobic", subs: ["Balance", "Coordination", "Agility"] },
+  Spe: { name: "Speed", type: "Aerobic", subs: ["Sprints", "Intervals", "Track"] },
 };
 
 const xpToNext = (r) => 50 + (r - 50) * 10;
@@ -301,14 +281,14 @@ const Avatar = ({ name, url, onClick }) => {
   );
 };
 
-const SmallStat = ({ label, value }) => (
-  <div className="text-center px-2 select-none">
+const SmallStat = ({ label, value, onClick }) => (
+  <div className="text-center px-2 select-none cursor-pointer" onClick={onClick}>
     <div className="text-[12px] tracking-wide opacity-80">{label}</div>
     <div className="font-extrabold text-[22px] leading-tight">{value}</div>
   </div>
 );
 
-const PlayerCard = ({ name, setName, avatarUrl, setAvatarUrl, ratings, onLongShare }) => {
+const PlayerCard = ({ name, setName, avatarUrl, setAvatarUrl, ratings, onLongShare, onStatClick }) => {
   const ovr = useMemo(() => computeOvr(ratings), [ratings]);
 
   const [avatarOpen, setAvatarOpen] = useState(false);
@@ -353,15 +333,15 @@ const PlayerCard = ({ name, setName, avatarUrl, setAvatarUrl, ratings, onLongSha
       {/* Stat grid */}
       <div className="mt-3">
         <div className="flex justify-center gap-4">
-          <SmallStat label="ARM" value={ratings.Arm} />
-          <SmallStat label="LEG" value={ratings.Leg} />
-          <SmallStat label="FRB" value={ratings.FrB} />
-          <SmallStat label="BAB" value={ratings.BaB} />
+          <SmallStat label="ARM" value={ratings.Arm} onClick={() => onStatClick && onStatClick("Arm")} />
+          <SmallStat label="FRB" value={ratings.FrB} onClick={() => onStatClick && onStatClick("FrB")} />
+          <SmallStat label="BAB" value={ratings.BaB} onClick={() => onStatClick && onStatClick("BaB")} />
+          <SmallStat label="LEG" value={ratings.Leg} onClick={() => onStatClick && onStatClick("Leg")} />
         </div>
         <div className="flex justify-center gap-6 mt-2">
-          <SmallStat label="STA" value={ratings.Sta} />
-          <SmallStat label="FLX" value={ratings.Fle} />
-          <SmallStat label="SPD" value={ratings.Spe} />
+          <SmallStat label="STA" value={ratings.Sta} onClick={() => onStatClick && onStatClick("Sta")} />
+          <SmallStat label="FLX" value={ratings.Fle} onClick={() => onStatClick && onStatClick("Fle")} />
+          <SmallStat label="SPD" value={ratings.Spe} onClick={() => onStatClick && onStatClick("Spe")} />
         </div>
       </div>
 
@@ -457,13 +437,13 @@ const AerobicPanel = ({ ratings, xp, onLongPress, theme }) => {
 
 const AnaerobicPanel = ({ ratings, xp, onLongPress, theme }) => {
   const blocks = [
-    { key: "Arm", label: "Arm Strength" },
-    { key: "Leg", label: "Leg Power" },
-    { key: "FrB", label: "Functional Body" },
-    { key: "BaB", label: "Balance & Ball" },
+  { key: "Arm", label: "Arms" },
+  { key: "Leg", label: "Legs" },
+  { key: "FrB", label: "Front Body" },
+  { key: "BaB", label: "Back Body" },
   ];
   return (
-  <PanelShell icon={<Icon.Muscle className="w-4 h-4" />} iconBg="bg-fuchsia-600/20" title="Anaerobic" subtitle="Power & Skill Training">
+    <PanelShell icon={<Icon.Muscle className="w-4 h-4" />} iconBg="bg-fuchsia-600/20" title="Anaerobic" subtitle="Power & Skill Training">
       <div className="grid grid-cols-2 gap-4">
         {blocks.map(({ key, label }) => {
           let timer;
@@ -472,6 +452,7 @@ const AnaerobicPanel = ({ ratings, xp, onLongPress, theme }) => {
           return (
             <div key={key}
               className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-xl p-2 -m-2 hover:bg-white/5 cursor-pointer select-none"
+              onClick={() => onStatClick && onStatClick(key)}
               onTouchStart={start} onTouchEnd={stop} onMouseDown={start} onMouseUp={stop}>
               <div className="text-fuchsia-200/90">{label}</div>
               <div className="font-[700] text-[20px] tracking-wide">{ratings[key]}</div>
@@ -702,7 +683,9 @@ const WeekCalendar = ({ workouts, weekOffset, setWeekOffset, weeklyGoal = 5 }) =
 
 function FitcardPrototype() {
   // Скрытый canvas для экспорта карточки
-  const canvasRef = useRef(null);
+  // const canvasRef = useRef(null); // Удалено дублирующее объявление
+  // Модалка для просмотра субкатегорий
+  const [subcatModal, setSubcatModal] = useState({ open: false, stat: null });
   // По умолчанию dark
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
@@ -901,8 +884,20 @@ function FitcardPrototype() {
     }
   };
 
+  // Новая логика начисления XP
+  function calcAnaerobicXp(weight, series) {
+    return Number(weight) * Number(series);
+  }
+  function calcAerobicXp(duration) {
+    return Math.floor(Number(duration) / 10) * 10;
+  }
   const onSaveWorkout = ({ stat, sub, date, isAerobic, duration, avgWeight, series }) => {
-    const earned = isAerobic ? Number(duration) : Number(avgWeight) * Number(series);
+    let earned = 0;
+    if (statMeta[stat].type === "Anaerobic") {
+      earned = calcAnaerobicXp(avgWeight, series);
+    } else {
+      earned = calcAerobicXp(duration);
+    }
     const result = applyXp({ currentRating: ratings[stat], currentXp: xp[stat], earned });
     const newRatings = { ...ratings, [stat]: result.rating };
     const newXp = { ...xp, [stat]: result.xp };
@@ -928,9 +923,53 @@ function FitcardPrototype() {
 
   const body = (
     <div className="space-y-5">
-      <div className="pt-[env(safe-area-inset-top,32px)] mt-[15px]">
-        <PlayerCard name={name} setName={setName} avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} ratings={ratings} onLongShare={shareCard} />
+  <div>
+        <PlayerCard name={name} setName={setName} avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} ratings={ratings} onLongShare={shareCard} onStatClick={(stat) => setSubcatModal({ open: true, stat })} />
       </div>
+      {/* Модалка субкатегорий */}
+      {subcatModal.open && subcatModal.stat && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-white dark:bg-neutral-900 text-black dark:text-white rounded-2xl p-6 w-full max-w-xs mx-4 shadow-2xl relative">
+            <button onClick={() => setSubcatModal({ open: false, stat: null })} className="absolute top-3 right-3 text-xl">×</button>
+            <h3 className="font-semibold text-lg tracking-tight mb-2">{statMeta[subcatModal.stat].name}</h3>
+            <ul className="space-y-2">
+              {statMeta[subcatModal.stat].subs.map((sub) => (
+                <li key={sub}
+                  className="px-3 py-2 rounded-xl bg-black/5 dark:bg-white/10 flex items-center justify-between cursor-pointer select-none"
+                  onTouchStart={(e) => {
+                    e.persist && e.persist();
+                    const timer = setTimeout(() => {
+                      setSubcatModal({ open: false, stat: null });
+                      setPreset({ key: subcatModal.stat, sub });
+                      setLoggerOpen(true);
+                    }, 450);
+                    e.target.dataset.timer = timer;
+                  }}
+                  onTouchEnd={(e) => {
+                    if (e.target.dataset.timer) clearTimeout(e.target.dataset.timer);
+                  }}
+                  onMouseDown={(e) => {
+                    const timer = setTimeout(() => {
+                      setSubcatModal({ open: false, stat: null });
+                      setPreset({ key: subcatModal.stat, sub });
+                      setLoggerOpen(true);
+                    }, 450);
+                    e.target.dataset.timer = timer;
+                  }}
+                  onMouseUp={(e) => {
+                    if (e.target.dataset.timer) clearTimeout(e.target.dataset.timer);
+                  }}
+                >
+                  <span>{sub}</span>
+                  {ratings?.[`${subcatModal.stat}_${sub}`] !== undefined ? (
+                    <span className="font-semibold">{ratings[`${subcatModal.stat}_${sub}`]}</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       <motion.button whileTap={{ scale: 0.98 }} onClick={() => setLoggerOpen(true)} className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-semibold shadow-lg flex items-center justify-center gap-2">
         <Icon.Plus className="w-4 h-4 fill-white" />
@@ -938,7 +977,7 @@ function FitcardPrototype() {
       </motion.button>
 
   <AerobicPanel ratings={ratings} xp={xp} onLongPress={(preset) => { setPreset(preset); setLoggerOpen(true); }} theme={theme} />
-  <AnaerobicPanel ratings={ratings} xp={xp} onLongPress={(preset) => { setPreset(preset); setLoggerOpen(true); }} theme={theme} />
+  <AnaerobicPanel ratings={ratings} xp={xp} onLongPress={(preset) => { setPreset(preset); setLoggerOpen(true); }} theme={theme} onStatClick={(stat) => setSubcatModal({ open: true, stat })} />
   <AchievementsPanel ratings={ratings} workouts={workouts} theme={theme} />
     </div>
   );
@@ -950,10 +989,10 @@ function FitcardPrototype() {
       {/* Скрытый canvas для экспорта карточки */}
       <canvas ref={canvasRef} width={600} height={340} style={{ display: 'none' }} aria-hidden="true"></canvas>
   {/* Убрали Header, safe-area теперь глобально через CSS */}
-  <main className="mx-auto max-w-md px-5 pb-28">
+  <main className="mx-auto max-w-md px-5 pb-28 pt-[50px]">
         {tab === "stats" && (
           <div className="space-y-5">
-            <div style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 32px)' }}>
+            <div>
               <PlayerCard name={name} setName={setName} avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} ratings={ratings} onLongShare={shareCard} />
             </div>
             <motion.button whileTap={{ scale: 0.98 }} onClick={() => setLoggerOpen(true)} className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-semibold shadow-lg flex items-center justify-center gap-2">
@@ -1090,6 +1129,7 @@ function FitcardPrototype() {
   );
 }
 
+export default FitcardPrototype;
 
 // ---------------- Self-tests (runtime, no UI impact) ----------------
 if (typeof window !== "undefined" && !window.__FITCARD_TESTED__) {
@@ -1121,5 +1161,3 @@ if (typeof window !== "undefined" && !window.__FITCARD_TESTED__) {
   const weekNums = Array.from({ length: 7 }, (_, i) => isoWeek(addDays(m, i)));
   console.assert(new Set(weekNums).size === 1, "isoWeek should be stable across Mon..Sun of same week");
 }
-
-export default FitcardPrototype;
