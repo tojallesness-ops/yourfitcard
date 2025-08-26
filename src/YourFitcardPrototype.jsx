@@ -701,6 +701,8 @@ const WeekCalendar = ({ workouts, weekOffset, setWeekOffset, weeklyGoal = 5 }) =
 // ---------------- Main Prototype ----------------
 
 function FitcardPrototype() {
+  // Скрытый canvas для экспорта карточки
+  const canvasRef = useRef(null);
   // По умолчанию dark
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
@@ -834,8 +836,14 @@ function FitcardPrototype() {
     }
   }, [theme]);
 
+  // Рисование карточки на canvas
   const drawCardToCanvas = async () => {
-    const canvas = canvasRef.current; if (!canvas) return null;
+    let canvas = canvasRef.current;
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.width = 600;
+      canvas.height = 340;
+    }
     const ctx = canvas.getContext("2d");
     const W = canvas.width, H = canvas.height;
     const g = ctx.createLinearGradient(0, 0, W, H);
@@ -861,14 +869,35 @@ function FitcardPrototype() {
   };
 
   const shareCard = async () => {
-    const canvas = await drawCardToCanvas(); if (!canvas) return;
+    const canvas = await drawCardToCanvas();
+    if (!canvas) {
+      alert('Ошибка: не удалось создать изображение.');
+      return;
+    }
     const blob = await new Promise((r) => canvas.toBlob(r, "image/png"));
+    if (!blob) {
+      alert('Ошибка: не удалось экспортировать изображение.');
+      return;
+    }
     const file = new File([blob], "fitcard.png", { type: "image/png" });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ title: "My Fitcard", text: `${name} – OVR ${computeOvr(ratings)}`, files: [file] }); } catch { /* canceled */ }
+      try {
+        await navigator.share({ title: "My Fitcard", text: `${name} – OVR ${computeOvr(ratings)}`, files: [file] });
+      } catch (e) {
+        alert('Отмена или ошибка при отправке: ' + (e?.message || '')); 
+      }
     } else {
-      const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "fitcard.png"; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-      alert("Image downloaded (sharing not supported).");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "fitcard.png";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        a.remove();
+        URL.revokeObjectURL(url);
+        alert("Изображение скачано (sharing не поддерживается).");
+      }, 100);
     }
   };
 
@@ -918,6 +947,8 @@ function FitcardPrototype() {
     <div className={
       `min-h-screen h-full w-full ${theme === "dark" ? "bg-neutral-950 text-white" : "bg-white text-black"}`
     }>
+      {/* Скрытый canvas для экспорта карточки */}
+      <canvas ref={canvasRef} width={600} height={340} style={{ display: 'none' }} aria-hidden="true"></canvas>
   {/* Убрали Header, safe-area теперь глобально через CSS */}
   <main className="mx-auto max-w-md px-5 pb-28">
         {tab === "stats" && (

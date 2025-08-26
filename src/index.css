@@ -1,6 +1,15 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Запретить выделение текста на всех кнопках и интерактивных элементах */
+button, [role="button"], .no-select, .select-none, input[type="button"], input[type="submit"] {
+	user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	-moz-user-select: none;
+}
 
 html, body, #root {
 	height: 100%;
