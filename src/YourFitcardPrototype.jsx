@@ -822,7 +822,9 @@ function FitcardPrototype() {
 
   const body = (
     <div className="space-y-5">
-      <PlayerCard name={name} setName={setName} avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} ratings={ratings} onLongShare={shareCard} />
+      <div className="pt-[env(safe-area-inset-top,32px)]">
+        <PlayerCard name={name} setName={setName} avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} ratings={ratings} onLongShare={shareCard} />
+      </div>
 
       <motion.button whileTap={{ scale: 0.98 }} onClick={() => setLoggerOpen(true)} className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-semibold shadow-lg flex items-center justify-center gap-2">
         <Icon.Plus className="w-4 h-4 fill-white" />
