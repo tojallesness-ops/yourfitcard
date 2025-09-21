@@ -857,7 +857,7 @@ function FitcardPrototype() {
       setTimeout(() => {
         a.remove();
         URL.revokeObjectURL(url);
-        alert("Изображение скачано (sharing не поддерживается).");
+        alert("Изображение карточки скачано! Файл можно найти в папке загрузок и поделиться с друзьями.");
       }, 100);
     }
   };
@@ -979,8 +979,17 @@ function FitcardPrototype() {
                 <button
                   className="px-3 py-2 rounded-xl bg-blue-500 text-white"
                   onClick={() => {
-                    const data = localStorage.getItem('fitcard-user');
-                    const blob = new Blob([data || '{}'], { type: 'application/json' });
+                    // Экспортируем актуальные данные о прогрессе и тренировках
+                    const exportData = {
+                      name,
+                      avatarUrl,
+                      ratings,
+                      xp,
+                      workouts,
+                      progress,
+                      weeklyGoal,
+                    };
+                    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
@@ -1029,15 +1038,7 @@ function FitcardPrototype() {
               </div>
             </div>
 
-            {/* Google Auth Panel */}
-            <GoogleAuthPanel
-              user={user}
-              onSignIn={handleGoogleSignIn}
-              onSignOut={handleGoogleSignOut}
-              onSave={saveProgressToCloud}
-              onLoad={loadProgressFromCloud}
-              theme={theme}
-            />
+            {/* Google Auth Panel скрыт по запросу пользователя */}
           </div>
         )}
       </main>
