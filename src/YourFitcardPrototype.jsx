@@ -4,29 +4,7 @@ import { useState as useLocalState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 
-// Google Identity Services loader (Promise-based)
-const loadGoogleScript = () => {
-  return new Promise((resolve, reject) => {
-    if (window.google && window.google.accounts && window.google.accounts.id) return resolve();
-    if (document.getElementById('google-identity')) {
-      // script есть, но возможно еще не загрузился
-      const check = () => {
-        if (window.google && window.google.accounts && window.google.accounts.id) resolve();
-        else setTimeout(check, 50);
-      };
-      check();
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.id = 'google-identity';
-    script.onload = () => resolve();
-    script.onerror = reject;
-    document.body.appendChild(script);
-  });
-};
+// Google Identity Services loader скрыт (функция отключена)
 
 // ---------------- Icons (inline SVG) ----------------
 const Icon = {
@@ -352,11 +330,11 @@ const PlayerCard = ({ name, setName, avatarUrl, setAvatarUrl, ratings, onLongSha
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.98, opacity: 0 }} transition={{ type: "spring", stiffness: 240, damping: 24 }} className="bg-white dark:bg-neutral-900 text-black dark:text-white rounded-2xl p-6 w-full max-w-xs mx-4 shadow-2xl">
               <h3 className="font-semibold text-lg tracking-tight">Avatar Image</h3>
               <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Paste an image URL (300kb recommended). Leave empty to remove.</p>
-              <div className="mt-3 text-xs opacity-70">or upload an image (≤300kb)</div>
+              <div className="mt-3 text-xs opacity-70">or upload an image (≤3MB)</div>
               <input type="file" accept="image/*" className="mt-1 w-full text-sm" onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (!f) return;
-                if (f.size > 307200) { alert("Please choose an image ≤ 300kb"); return; }
+                if (f.size > 3145728) { alert("Please choose an image ≤ 3MB"); return; }
                 const reader = new FileReader();
                 reader.onload = () => setTmpUrl(reader.result);
                 reader.readAsDataURL(f);
@@ -921,66 +899,8 @@ function FitcardPrototype() {
     return list;
   })();
 
-  const body = (
-    <div className="space-y-5">
-  <div>
-        <PlayerCard name={name} setName={setName} avatarUrl={avatarUrl} setAvatarUrl={setAvatarUrl} ratings={ratings} onLongShare={shareCard} onStatClick={(stat) => setSubcatModal({ open: true, stat })} />
-      </div>
-      {/* Модалка субкатегорий */}
-      {subcatModal.open && subcatModal.stat && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-white dark:bg-neutral-900 text-black dark:text-white rounded-2xl p-6 w-full max-w-xs mx-4 shadow-2xl relative">
-            <button onClick={() => setSubcatModal({ open: false, stat: null })} className="absolute top-3 right-3 text-xl">×</button>
-            <h3 className="font-semibold text-lg tracking-tight mb-2">{statMeta[subcatModal.stat].name}</h3>
-            <ul className="space-y-2">
-              {statMeta[subcatModal.stat].subs.map((sub) => (
-                <li key={sub}
-                  className="px-3 py-2 rounded-xl bg-black/5 dark:bg-white/10 flex items-center justify-between cursor-pointer select-none"
-                  onTouchStart={(e) => {
-                    e.persist && e.persist();
-                    const timer = setTimeout(() => {
-                      setSubcatModal({ open: false, stat: null });
-                      setPreset({ key: subcatModal.stat, sub });
-                      setLoggerOpen(true);
-                    }, 450);
-                    e.target.dataset.timer = timer;
-                  }}
-                  onTouchEnd={(e) => {
-                    if (e.target.dataset.timer) clearTimeout(e.target.dataset.timer);
-                  }}
-                  onMouseDown={(e) => {
-                    const timer = setTimeout(() => {
-                      setSubcatModal({ open: false, stat: null });
-                      setPreset({ key: subcatModal.stat, sub });
-                      setLoggerOpen(true);
-                    }, 450);
-                    e.target.dataset.timer = timer;
-                  }}
-                  onMouseUp={(e) => {
-                    if (e.target.dataset.timer) clearTimeout(e.target.dataset.timer);
-                  }}
-                >
-                  <span>{sub}</span>
-                  {ratings?.[`${subcatModal.stat}_${sub}`] !== undefined ? (
-                    <span className="font-semibold">{ratings[`${subcatModal.stat}_${sub}`]}</span>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
 
-      <motion.button whileTap={{ scale: 0.98 }} onClick={() => setLoggerOpen(true)} className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white font-semibold shadow-lg flex items-center justify-center gap-2">
-        <Icon.Plus className="w-4 h-4 fill-white" />
-        <span>Log a Workout</span>
-      </motion.button>
-
-  <AerobicPanel ratings={ratings} xp={xp} onLongPress={(preset) => { setPreset(preset); setLoggerOpen(true); }} theme={theme} />
-  <AnaerobicPanel ratings={ratings} xp={xp} onLongPress={(preset) => { setPreset(preset); setLoggerOpen(true); }} theme={theme} onStatClick={(stat) => setSubcatModal({ open: true, stat })} />
-  <AchievementsPanel ratings={ratings} workouts={workouts} theme={theme} />
-    </div>
-  );
+  // ...оставляем только основной контент без второго приветственного экрана...
 
   return (
     <div className={

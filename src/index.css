@@ -1,3 +1,16 @@
+/* Светлый фон для блоков на странице Stats */
+.stats-panel {
+	background-color: #f5f6fa; /* светло-серый, как на Season */
+	border: 1px solid #e5e7eb;
+	color: #222;
+}
+
+/* Тёмный фон для блоков в dark mode */
+html.dark .stats-panel, body.dark .stats-panel, #root.dark .stats-panel {
+	background-color: #181824;
+	border-color: #23232b;
+	color: #fff;
+}
 /* Стили для select/option в светлой и тёмной темах */
 select, option {
 	color: #111;
