@@ -679,71 +679,7 @@ function FitcardPrototype() {
   // Sharing canvas
   const canvasRef = useRef(null);
 
-  // ---- Google Sign-In (real GIS) ----
-  const [user, setUser] = useState(null);
-  const snapshot = () => ({ name, avatarUrl, ratings, xp, workouts, progress, weeklyGoal });
-  const applySnapshot = (s) => {
-    if (!s) return;
-    setName(s.name ?? name);
-    setAvatarUrl(s.avatarUrl ?? "");
-    setRatings(s.ratings ?? ratings);
-    setXp(s.xp ?? xp);
-    setWorkouts(s.workouts ?? workouts);
-    setProgress(s.progress ?? progress);
-    if (typeof s.weeklyGoal === 'number') setWeeklyGoal(s.weeklyGoal);
-  };
-  const cloudKey = (email) => `fitcard_cloud_${email}`;
-  const saveProgressToCloud = () => {
-    if (!user?.email) { alert('Please sign in first'); return; }
-    try { localStorage.setItem(cloudKey(user.email), JSON.stringify(snapshot())); alert('Progress saved to cloud (prototype)'); } catch { alert('Save failed'); }
-  };
-  const loadProgressFromCloud = () => {
-    if (!user?.email) { alert('Please sign in first'); return; }
-    try {
-      const raw = localStorage.getItem(cloudKey(user.email));
-      if (!raw) { alert('No cloud save found'); return; }
-      const data = JSON.parse(raw);
-      applySnapshot(data);
-      alert('Progress loaded');
-    } catch { alert('Load failed'); }
-  };
-  // Google Sign-In через GIS
-  useEffect(() => {
-    loadGoogleScript().then(() => {
-      if (window.google && window.google.accounts && window.google.accounts.id && !window._gis_initialized) {
-        window.google.accounts.id.initialize({
-          client_id: '625171210112-28d0ohk62ad512jsqpjcmdan341n14fd.apps.googleusercontent.com',
-          callback: (response) => {
-            const base64Url = response.credential.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            const payload = JSON.parse(jsonPayload);
-            setUser({ email: payload.email, displayName: payload.name || payload.email.split('@')[0] });
-            const raw = localStorage.getItem(cloudKey(payload.email));
-            if (raw) applySnapshot(JSON.parse(raw));
-          },
-          ux_mode: 'popup',
-          auto_select: true,
-        });
-        window._gis_initialized = true;
-      }
-    });
-  }, []);
-  const handleGoogleSignIn = async () => {
-    await loadGoogleScript();
-    if (!window.google || !window.google.accounts || !window.google.accounts.id) {
-      alert('Google Identity Services не загружены');
-      return;
-    }
-    window.google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        alert('Google Sign-In отменён или недоступен');
-      }
-    });
-  };
-  const handleGoogleSignOut = () => { setUser(null); };
+  // Google Sign-In removed: cloud save/load and GIS integration disabled
   // --- Сохранять прогресс локально при изменениях ---
   useEffect(() => {
     const data = snapshot();
