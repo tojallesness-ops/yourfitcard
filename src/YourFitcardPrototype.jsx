@@ -485,40 +485,7 @@ const AchievementsPanel = ({ ratings, workouts, theme }) => {
   );
 };
 
-const GoogleAuthPanel = ({ user, onSignIn, onSignOut, onSave, onLoad, theme }) => {
-  const [synced, setSynced] = useLocalState(false);
-  const handleSave = () => {
-    onSave();
-    setSynced(true);
-    setTimeout(() => setSynced(false), 2000);
-  };
-  return (
-    <div className={
-      theme === "dark"
-        ? "rounded-2xl p-5 bg-white/5 border border-white/10 flex items-center justify-between"
-        : "rounded-2xl p-5 bg-black/5 border border-black/5 flex items-center justify-between"
-    }>
-      <div>
-        <div className="font-semibold tracking-tight">Save the progress</div>
-        <div className="text-sm opacity-70">{user ? `Signed in as ${user.email}` : 'Use your Google account to save and sync your workouts'}</div>
-      </div>
-      <div className="flex items-center gap-2">
-        {!user ? (
-          <motion.button whileTap={{ scale: 0.97 }} onClick={onSignIn} className="px-3 py-2 rounded-xl bg-white text-black flex items-center gap-2">
-            <svg viewBox="0 0 533.5 544.3" className="w-4 h-4"><path fill="#4285F4" d="M533.5 278.4c0-18.6-1.7-36.4-4.9-53.7H272v101.7h146.9c-6.3 34.1-25.2 63-53.7 82.3v68.4h86.9c50.9-46.9 81.4-116 81.4-198.7z"/><path fill="#34A853" d="M272 544.3c72.9 0 134.1-24.1 178.8-65.6l-86.9-68.4c-24.1 16.2-54.9 25.9-91.9 25.9-70.6 0-130.5-47.6-152-111.6H30.9v69.9C75.4 486.2 167.1 544.3 272 544.3z"/><path fill="#FBBC05" d="M120 324.6c-10.1-30.1-10.1-62.5 0-92.6V162.1h-89.1c-38.5 76.9-38.5 167.9 0 244.7l89.1-82.2z"/><path fill="#EA4335" d="M272 107.7c39.6-.6 77.4 13.9 106.3 39.4l79.3-79.3C411.6 24.5 344.9-.1 272 0 167.1 0 75.4 57.9 30.9 162.1l89.1 69.9c21.5-64 81.4-111.6 152-111.6z"/></svg>
-            <span>Log in</span>
-          </motion.button>
-        ) : (
-          <div className="flex items-center gap-2">
-            <button onClick={handleSave} className="px-3 py-2 rounded-xl bg-white/10">{synced ? "Synced" : "Save"}</button>
-            <button onClick={onLoad} className="px-3 py-2 rounded-xl bg-white/10">Load</button>
-            <button onClick={onSignOut} className="px-3 py-2 rounded-xl bg-white/10">Sign out</button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+;
 const startOfWeek = (date) => {
   const d = new Date(date);
   const day = d.getDay(); // 0 Sun .. 6 Sat
